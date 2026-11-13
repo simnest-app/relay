@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Builds the helper from the source in ./helper instead of pulling the published image: for a machine that cannot
+# reach Docker Hub, or to run your own changes.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+
+services:
+  helper:
+    image: simnest-relay-helper:local
+    build: ./helper

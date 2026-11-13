@@ -17,7 +17,7 @@
 | 部分 | 说明 |
 | --- | --- |
 | coturn | TURN 中继，官方镜像 `coturn/coturn:4.18.0`，按镜像摘要固定，不会自己变成别的版本 |
-| 小助手 `helper/` | 我们写的 Go 小程序：第一次运行生成密钥，写出 coturn 的安全配置，在局域网网页上显示给网关扫的二维码，并自检 |
+| 小助手 `helper/` | 我们写的 Go 小程序：第一次运行生成密钥，写出 coturn 的安全配置，在局域网网页上显示给网关扫的二维码，并自检。默认用已发布的镜像 `simnest/relay-helper`（x86 和 ARM 都有，按镜像摘要固定），也可以用这里的源码自己构建 |
 | `helper/turnserver.conf.tmpl` | 安全配置模板：只认临时凭据、限额、禁止转发到内网和保留地址（含 IPv4 写成 IPv6 的各种写法）、不替别人连 TCP |
 
 ## 需要什么
@@ -53,6 +53,16 @@ docker compose -f docker-compose.yml -f docker-compose.bridge.yml up -d
 
 这种方式只有 IPv4；网关和这台机器在同一个局域网时，要在 `.env` 里填 `LAN_IP`。
 
+### 拉不到镜像时
+
+小助手的镜像放在 Docker Hub 上。这台机器连不上 Docker Hub，或者你想运行自己改过的代码时，改为用 `helper/` 里的源码在本机构建：
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+```
+
+要同时用上面的 `docker-compose.bridge.yml`，就把三个文件都写上。本机构建需要能下载 Go 的构建镜像；coturn 的官方镜像也在 Docker Hub 上，拉不到的话要先给 Docker 配镜像加速。
+
 ## 在网关上添加
 
 在网关上打开“自建中继”，拍下设置页面上的二维码，或者把页面上的文字粘贴进去。网关会立刻实测一次：能不能连上、能不能申请到中继、往返多少毫秒。
@@ -64,8 +74,14 @@ docker compose -f docker-compose.yml -f docker-compose.bridge.yml up -d
 换成新版本的部署包，或者改了 `.env` 之后：
 
 ```bash
-docker compose up -d --build --force-recreate
+docker compose pull
 ```
+
+```bash
+docker compose up -d --force-recreate
+```
+
+用本机构建的话，改成 `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build --force-recreate`。
 
 `--force-recreate` 让 coturn 也重新启动，用上小助手新写的配置；不加的话 coturn 还在用旧配置。重启的几秒里，正在经这台中继的通话会断一下。密钥和设置都在数据卷里，更新后不用在网关上重新添加。
 
