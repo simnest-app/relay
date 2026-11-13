@@ -1,0 +1,9 @@
+SimNest relay deployment package
+Licensed under the GNU General Public License, version 3 (see LICENSE).
+
+This package does not contain coturn. Its compose file runs the coturn project's official container image
+(coturn/coturn on Docker Hub), which Docker downloads from there. coturn is distributed under the BSD 3-Clause
+license: https://github.com/coturn/coturn/blob/master/LICENSE
+
+The helper uses rsc.io/qr (BSD 3-Clause, Copyright (c) 2009 The Go Authors) to draw the QR code:
+https://github.com/rsc/qr/blob/master/LICENSE

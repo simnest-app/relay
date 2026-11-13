@@ -1,0 +1,23 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# For a Docker that cannot share the host's network (Docker Desktop, some NAS systems): the two containers get a
+# network of their own and the ports are published one by one. IPv4 only. Keep the ports here the same as in .env.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.bridge.yml up -d
+#
+# The helper cannot see the machine's own address from in there: set LAN_IP in .env if the gateway is in the same
+# network as this machine.
+
+services:
+  helper:
+    network_mode: !reset null
+    environment:
+      COTURN_ADDR: "coturn:${LISTEN_PORT:-3478}"
+    ports:
+      - "${PAGE_PORT:-8787}:${PAGE_PORT:-8787}/tcp"
+
+  coturn:
+    network_mode: !reset null
+    ports:
+      - "${LISTEN_PORT:-3478}:${LISTEN_PORT:-3478}/udp"
+      - "${LISTEN_PORT:-3478}:${LISTEN_PORT:-3478}/tcp"
+      - "${MIN_PORT:-49160}-${MAX_PORT:-49200}:${MIN_PORT:-49160}-${MAX_PORT:-49200}/udp"

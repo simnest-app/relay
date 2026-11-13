@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# A SimNest self-hosted media relay: coturn, and a helper that makes its secret and configuration and shows the
+# code the gateway scans. Both share the host's network, as a TURN server needs its ports as they are (IPv4 and
+# IPv6). Where that is not possible, add docker-compose.bridge.yml (see README).
+#
+#   cp .env.example .env    # set EXTERNAL_IP
+#   docker compose up -d
+#   docker compose logs helper    # the setup page's address
+
+services:
+  helper:
+    build: ./helper
+    restart: unless-stopped
+    network_mode: host
+    env_file: .env
+    volumes:
+      - relay-data:/data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "/helper", "healthy"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  coturn:
+    # The official image, fixed to one build by its digest: 4.18.0 (Debian), published 2026-09-08.
+    image: coturn/coturn:4.18.0@sha256:bbefd3e1fdfdc0d58770fe01b581fd8b00d9f3a5580d00acb77cf719a6bc78e3
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      helper:
+        condition: service_healthy
+    # The same unprivileged user as the helper, which wrote the configuration for it alone to read.
+    user: "65534:65534"
+    command: ["-c", "/data/turnserver.conf"]
+    volumes:
+      - relay-data:/data:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/lib/coturn
+    # Every capability dropped but the one the image's turnserver program is marked with (binding low ports): the
+    # system refuses to start a program marked with a capability the container may not have.
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    security_opt: ["no-new-privileges:true"]
+
+volumes:
+  relay-data:

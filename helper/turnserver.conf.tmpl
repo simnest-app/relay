@@ -1,0 +1,77 @@
+# coturn configuration for a SimNest media relay. Written by the helper from the values in .env; edit .env and
+# restart rather than this file, which is written again at every start.
+#
+# The relay only forwards the encrypted sound of calls. It cannot hear or change it: the two ends of a call encrypt
+# to each other (DTLS-SRTP) and check each other's keys.
+
+# --- Where it listens -------------------------------------------------------------------------------------------
+listening-port={{.Port}}
+min-port={{.MinPort}}
+max-port={{.MaxPort}}
+# The address the other end of a call is told to send to: this machine's public address.
+external-ip={{.ExternalIP}}
+# Plain TURN over UDP and TCP only. No TLS listener: the sound is already encrypted end to end, and a listener that
+# is not needed is one fewer thing to attack. (coturn 4.18 has no DTLS listener unless asked for one, and no longer
+# takes "no-dtls".)
+no-tls
+
+# --- Who may use it ---------------------------------------------------------------------------------------------
+# Only short-term credentials made from this secret: the user name carries its own expiry. No accounts, no database.
+use-auth-secret
+static-auth-secret={{.Secret}}
+realm={{.Realm}}
+fingerprint
+# No command-line management port: coturn 4.18 has none unless "cli" is given, and "no-cli" is now an error.
+
+# --- How much each may use --------------------------------------------------------------------------------------
+# Relay sessions in all, and per credential; bytes per second per session ({{.MaxKbps}} kbps).
+total-quota={{.TotalQuota}}
+user-quota={{.UserQuota}}
+max-bps={{.MaxBps}}
+
+# --- Where it may forward to ------------------------------------------------------------------------------------
+# Never a TCP connection on a client's behalf: calls need UDP relaying only.
+no-tcp-relay
+no-multicast-peers
+# Never to this machine, the network it is in, or any address that is not a public one, so the relay cannot be used
+# to reach into its owner's network. Recent coturn versions refuse most of these by themselves and work out what an
+# IPv6 spelling of an IPv4 address means before checking; the list is a second line of defence.
+denied-peer-ip=0.0.0.0-0.255.255.255
+denied-peer-ip=10.0.0.0-10.255.255.255
+denied-peer-ip=100.64.0.0-100.127.255.255
+denied-peer-ip=127.0.0.0-127.255.255.255
+denied-peer-ip=169.254.0.0-169.254.255.255
+denied-peer-ip=172.16.0.0-172.31.255.255
+denied-peer-ip=192.0.0.0-192.0.0.255
+denied-peer-ip=192.0.2.0-192.0.2.255
+denied-peer-ip=192.88.99.0-192.88.99.255
+denied-peer-ip=192.168.0.0-192.168.255.255
+denied-peer-ip=198.18.0.0-198.19.255.255
+denied-peer-ip=198.51.100.0-198.51.100.255
+denied-peer-ip=203.0.113.0-203.0.113.255
+denied-peer-ip=224.0.0.0-255.255.255.255
+# IPv6: loopback, IPv4 written as IPv6 (mapped, translated, NAT64, 6to4, Teredo), discard, documentation, unique
+# local, link local, multicast.
+#
+# NOT the range ::/96 ("IPv4-compatible", :: to ::ffff:ffff), and no range that contains it: coturn compares every
+# IPv4 peer in that form, so such a rule refuses all IPv4 addresses and no call gets through, while allocations and
+# self-tests between two clients of the same relay still work. Seen on the official relay (coturn 4.6.1) on
+# 2026-11-11 and again on 4.18.0 when this file was first tried. The helper's check "转发规则" catches it.
+denied-peer-ip=::1
+denied-peer-ip=::ffff:0:0-::ffff:ffff:ffff
+denied-peer-ip=::ffff:0:0:0-::ffff:0:ffff:ffff
+denied-peer-ip=64:ff9b::-64:ff9b::ffff:ffff
+denied-peer-ip=64:ff9b:1::-64:ff9b:1:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=100::-100::ffff:ffff:ffff:ffff
+denied-peer-ip=2001::-2001:0:ffff:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=2001:db8::-2001:db8:ffff:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=2002::-2002:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=fc00::-fdff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=fe80::-febf:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+denied-peer-ip=ff00::-ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff
+
+# --- Housekeeping -----------------------------------------------------------------------------------------------
+log-file=stdout
+simple-log
+no-software-attribute
+pidfile=/tmp/turnserver.pid
