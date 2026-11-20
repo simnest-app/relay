@@ -11,7 +11,7 @@ services:
   helper:
     # Built from ./helper and published for amd64 and arm64, fixed to one build by its digest. To build it here
     # instead (no access to Docker Hub, or to run your own changes), add docker-compose.build.yml (see README).
-    image: simnest/relay-helper:0.1.0@sha256:d938a0f5557c683b0e3386f23a8d11b54987d2d2f8cd1ee847d4bc1c4583837d
+    image: simnest/relay-helper:0.1.1@sha256:513842cd22a4621083647531dbc91b77a51686dd21263eae176575af8943ba99
     restart: unless-stopped
     network_mode: host
     env_file: .env

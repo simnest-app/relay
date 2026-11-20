@@ -27,7 +27,7 @@ func TestConfigDefaultsAndChecks(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if c.Host != "203.0.113.7" || c.Port != 3478 || c.MinPort != 49160 || c.MaxPort != 49200 || c.TotalQuota != 20 || c.UserQuota != 6 || c.MaxKbps != 256 ||
+	if c.Host != "203.0.113.7" || c.Port != 3478 || c.MinPort != 49160 || c.MaxPort != 49359 || c.TotalQuota != 160 || c.UserQuota != 24 || c.MaxKbps != 256 ||
 		c.CoturnAddr != "127.0.0.1:3478" || c.DataDir != "/data" {
 		t.Fatalf("%+v", c)
 	}
@@ -82,7 +82,7 @@ func TestRenderedConfigurationKeepsTheProtections(t *testing.T) {
 	}
 	for _, want := range []string{
 		"use-auth-secret", "static-auth-secret=the-secret", "fingerprint", "no-tcp-relay", "no-multicast-peers", "no-tls",
-		"listening-port=3478", "min-port=49160", "max-port=49200", "external-ip=203.0.113.7", "total-quota=20", "user-quota=6", "max-bps=32000",
+		"listening-port=3478", "min-port=49160", "max-port=49359", "external-ip=203.0.113.7", "total-quota=160", "user-quota=24", "max-bps=32000",
 		// Private, loopback, link-local, carrier NAT and multicast, and IPv4 written as IPv6.
 		"denied-peer-ip=10.0.0.0-10.255.255.255", "denied-peer-ip=127.0.0.0-127.255.255.255", "denied-peer-ip=169.254.0.0-169.254.255.255",
 		"denied-peer-ip=172.16.0.0-172.31.255.255", "denied-peer-ip=192.168.0.0-192.168.255.255", "denied-peer-ip=100.64.0.0-100.127.255.255",

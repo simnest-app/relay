@@ -20,7 +20,7 @@ import (
 )
 
 // Version of this deployment package; shown on the page and carried in the code the gateway scans.
-const Version = "0.1.0"
+const Version = "0.1.1"
 
 //go:embed turnserver.conf.tmpl
 var confTemplate string
@@ -98,8 +98,8 @@ func LoadConfig(get func(string) string) (Config, error) {
 		name        string
 		def, lo, hi int
 	}{
-		{&c.Port, "LISTEN_PORT", 3478, 1, 65535}, {&c.MinPort, "MIN_PORT", 49160, 1024, 65535}, {&c.MaxPort, "MAX_PORT", 49200, 1024, 65535},
-		{&c.TotalQuota, "TOTAL_QUOTA", 20, 1, 10000}, {&c.UserQuota, "USER_QUOTA", 6, 1, 1000}, {&c.MaxKbps, "MAX_KBPS", 256, 32, 100000},
+		{&c.Port, "LISTEN_PORT", 3478, 1, 65535}, {&c.MinPort, "MIN_PORT", 49160, 1024, 65535}, {&c.MaxPort, "MAX_PORT", 49359, 1024, 65535},
+		{&c.TotalQuota, "TOTAL_QUOTA", 160, 1, 10000}, {&c.UserQuota, "USER_QUOTA", 24, 1, 1000}, {&c.MaxKbps, "MAX_KBPS", 256, 32, 100000},
 		{&c.PagePort, "PAGE_PORT", 8787, 1, 65535},
 	}
 	for _, i := range ints {

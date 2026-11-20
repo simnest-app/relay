@@ -20,4 +20,4 @@ services:
     ports:
       - "${LISTEN_PORT:-3478}:${LISTEN_PORT:-3478}/udp"
       - "${LISTEN_PORT:-3478}:${LISTEN_PORT:-3478}/tcp"
-      - "${MIN_PORT:-49160}-${MAX_PORT:-49200}:${MIN_PORT:-49160}-${MAX_PORT:-49200}/udp"
+      - "${MIN_PORT:-49160}-${MAX_PORT:-49359}:${MIN_PORT:-49160}-${MAX_PORT:-49359}/udp"
